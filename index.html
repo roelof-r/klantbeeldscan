@@ -1,0 +1,1259 @@
+<title>Klantbeeldscan</title>
+<style>
+  :root{
+    --bg:#F5FAF9;
+    --surface:#FFFFFF;
+    --surface-muted:#EAF6F6;
+    --surface-warm:#FCF1E3;
+    --text:#0B2E33;
+    --text-muted:#5C7A80;
+    --primary:#028090;
+    --primary-dark:#013A40;
+    --secondary:#00A896;
+    --accent:#F2A93C;
+    --border:#CFE9E8;
+    --border-strong:#9DCFC6;
+    --critical:#B5473F;
+    --critical-bg:#FBEAE8;
+    --warn-ink:#9A5B12;
+    --brand-deep:#013A40;
+    --shadow: 0 1px 2px rgba(1,58,64,0.06), 0 8px 24px rgba(1,58,64,0.08);
+    --radius-s:8px;
+    --radius-m:14px;
+    --radius-l:22px;
+    --font-head:'Cambria','Georgia','Times New Roman',serif;
+    --font-body:'Calibri','Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#04181B;
+      --surface:#0B2A2E;
+      --surface-muted:#0E3439;
+      --surface-warm:#2A2213;
+      --text:#EAF6F6;
+      --text-muted:#9FC9CB;
+      --primary:#4FC7D1;
+      --primary-dark:#8FE0D6;
+      --secondary:#4DD9C2;
+      --accent:#F2A93C;
+      --border:#194247;
+      --border-strong:#1F5A57;
+      --critical:#E58179;
+      --critical-bg:#3A2320;
+      --warn-ink:#F2A93C;
+      --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 8px 24px rgba(0,0,0,0.35);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#04181B;
+    --surface:#0B2A2E;
+    --surface-muted:#0E3439;
+    --surface-warm:#2A2213;
+    --text:#EAF6F6;
+    --text-muted:#9FC9CB;
+    --primary:#4FC7D1;
+    --primary-dark:#8FE0D6;
+    --secondary:#4DD9C2;
+    --accent:#F2A93C;
+    --border:#194247;
+    --border-strong:#1F5A57;
+    --critical:#E58179;
+    --critical-bg:#3A2320;
+    --warn-ink:#F2A93C;
+    --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 8px 24px rgba(0,0,0,0.35);
+  }
+
+  *{box-sizing:border-box;}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:var(--font-body);
+    padding-inline:16px;
+    min-height:100%;
+    font-size:15px;
+    line-height:1.5;
+  }
+  h1,h2,h3,h4{font-family:var(--font-head); font-weight:700; color:var(--text); text-wrap:balance; margin:0;}
+  p{margin:0;}
+  button{font-family:inherit; font-size:inherit;}
+  ::selection{background:var(--accent); color:var(--brand-deep);}
+
+  #app{max-width:1040px; margin:0 auto; padding-block:20px 40px;}
+
+  /* ---------- top bar ---------- */
+  .topbar{
+    position:sticky; top:env(safe-area-inset-top,0px);
+    z-index:20;
+    display:flex; align-items:center; gap:14px;
+    background:var(--brand-deep);
+    color:#EAF6F6;
+    border-radius:var(--radius-m);
+    padding:12px 18px;
+    box-shadow:var(--shadow);
+    margin-bottom:22px;
+  }
+  .topbar .brand{
+    display:flex; align-items:center; gap:10px;
+    font-family:var(--font-head); font-weight:700; font-size:17px;
+    white-space:nowrap;
+  }
+  .topbar .brand .dot{width:10px;height:10px;border-radius:50%;background:var(--accent); flex:none;}
+  .topbar .stepper{
+    display:flex; gap:6px; flex:1; justify-content:center; flex-wrap:wrap;
+  }
+  .topbar .step{
+    width:30px;height:30px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    font-size:12.5px; font-weight:700;
+    background:rgba(255,255,255,0.08);
+    color:rgba(234,246,246,0.55);
+    border:1.5px solid transparent;
+    transition:all .2s ease;
+    flex:none;
+  }
+  .topbar .step.done{background:var(--secondary); color:#04181B;}
+  .topbar .step.current{border-color:var(--accent); color:#EAF6F6; background:rgba(242,169,60,0.18);}
+  .topbar .gear{
+    background:transparent; border:1.5px solid rgba(234,246,246,0.3); color:#EAF6F6;
+    border-radius:999px; width:34px; height:34px; flex:none; cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .topbar .gear:hover{border-color:var(--accent); color:var(--accent);}
+
+  /* ---------- cards / layout ---------- */
+  .card{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:var(--radius-l);
+    box-shadow:var(--shadow);
+    padding:32px;
+  }
+  @media (max-width:560px){ .card{padding:20px;} }
+  .card + .card{margin-top:16px;}
+  .center-col{max-width:720px; margin-inline:auto;}
+
+  .eyebrow{
+    font-size:12px; font-weight:700; letter-spacing:.08em; text-transform:uppercase;
+    color:var(--primary); display:flex; align-items:center; gap:8px;
+  }
+  .lede{color:var(--text-muted); font-size:15.5px; margin-top:10px; max-width:60ch;}
+
+  .btn{
+    appearance:none; border:none; cursor:pointer; border-radius:999px;
+    padding:12px 22px; font-weight:700; font-size:14.5px;
+    display:inline-flex; align-items:center; gap:8px;
+    transition:transform .08s ease, box-shadow .15s ease, background .15s ease;
+  }
+  .btn:active{transform:scale(0.98);}
+  .btn-primary{background:var(--primary); color:#fff;}
+  .btn-primary:hover{filter:brightness(0.9);}
+  .btn-primary:disabled{opacity:.4; cursor:not-allowed;}
+  .btn-ghost{background:transparent; color:var(--primary); border:1.5px solid var(--border-strong);}
+  .btn-ghost:hover{background:var(--surface-muted);}
+  .btn-accent{background:var(--accent); color:var(--brand-deep);}
+  .btn-accent:hover{filter:brightness(1.05);}
+  .btn:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visible, [tabindex]:focus-visible{
+    outline:3px solid var(--accent); outline-offset:2px;
+  }
+
+  .navbar{
+    position:sticky; bottom:env(safe-area-inset-bottom,0px);
+    display:flex; justify-content:space-between; align-items:center; gap:10px;
+    background:var(--surface); border:1px solid var(--border);
+    border-radius:var(--radius-m); padding:12px 16px; margin-top:18px;
+    box-shadow:var(--shadow);
+  }
+  .navbar .spacer{flex:1;}
+  .progress-text{font-size:13px; color:var(--text-muted); font-weight:600;}
+
+  /* ---------- intro ---------- */
+  .intro-grid{display:grid; grid-template-columns:1.3fr 1fr; gap:22px;}
+  @media (max-width:760px){ .intro-grid{grid-template-columns:1fr;} }
+  .startpoints{display:grid; gap:10px;}
+  .startpoint{
+    background:var(--surface-muted); border:1px solid var(--border);
+    border-radius:var(--radius-m); padding:14px 16px;
+    display:flex; gap:12px; align-items:flex-start;
+  }
+  .startpoint svg{flex:none; margin-top:2px;}
+  .startpoint b{display:block; font-size:14.5px;}
+  .startpoint span{color:var(--text-muted); font-size:13.5px;}
+
+  /* ---------- form fields ---------- */
+  label.field{display:block; margin-top:16px;}
+  label.field .lbl{font-weight:700; font-size:13.5px; display:flex; gap:6px;}
+  label.field .req{color:var(--critical);}
+  input[type=text], select, textarea{
+    width:100%; margin-top:6px; padding:10px 12px;
+    border:1.5px solid var(--border-strong); border-radius:var(--radius-s);
+    background:var(--surface); color:var(--text); font-family:inherit; font-size:14.5px;
+  }
+  textarea{resize:vertical; min-height:64px;}
+  .hint{font-size:12.5px; color:var(--text-muted); margin-top:4px;}
+  .radio-row{display:flex; flex-wrap:wrap; gap:8px; margin-top:6px;}
+  .chip-choice{
+    border:1.5px solid var(--border-strong); border-radius:999px; padding:8px 14px;
+    cursor:pointer; font-size:13.5px; font-weight:600; background:var(--surface);
+    color:var(--text);
+  }
+  .chip-choice input{position:absolute; opacity:0; pointer-events:none;}
+  .chip-choice.checked{background:var(--primary); border-color:var(--primary); color:#fff;}
+
+  /* ---------- question blocks ---------- */
+  .topic-head{display:flex; align-items:center; gap:14px; margin-bottom:6px;}
+  .topic-icon{
+    width:46px;height:46px;border-radius:50%; flex:none;
+    background:var(--primary); color:#fff;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .topic-title{font-size:20px;}
+  .topic-sub{color:var(--text-muted); font-size:13.5px; margin-top:2px;}
+
+  .question{
+    border-top:1px solid var(--border); padding-block:22px;
+  }
+  .question:first-of-type{border-top:none; padding-top:8px;}
+  .q-id{
+    display:inline-flex; align-items:center; justify-content:center;
+    width:26px;height:26px;border-radius:7px; background:var(--surface-muted);
+    color:var(--primary); font-weight:700; font-size:12px; margin-right:8px;
+  }
+  .q-text{font-size:15.5px; font-weight:700; display:inline;}
+  .options{display:grid; gap:8px; margin-top:14px;}
+  .option{
+    display:flex; align-items:flex-start; gap:12px;
+    border:1.5px solid var(--border); border-radius:var(--radius-m);
+    padding:12px 14px; cursor:pointer; background:var(--surface);
+    transition:border-color .15s ease, background .15s ease;
+  }
+  .option:hover{border-color:var(--border-strong);}
+  .option input{margin-top:3px; accent-color:var(--primary); flex:none;}
+  .option.selected{border-color:var(--primary); background:var(--surface-muted);}
+  .option .opt-text{font-size:14px; color:var(--text);}
+  .option.unknown{border-style:dashed;}
+  .option.unknown .opt-text{color:var(--text-muted); font-style:italic;}
+
+  .toelicht-toggle{
+    margin-top:10px; background:none; border:none; color:var(--primary);
+    font-weight:600; font-size:13px; cursor:pointer; padding:4px 0;
+    text-decoration:underline; text-underline-offset:2px;
+  }
+  .toelicht-box{margin-top:8px;}
+
+  .extra-field{
+    margin-top:16px; padding:14px 16px; background:var(--surface-muted);
+    border-radius:var(--radius-m); border:1px solid var(--border);
+  }
+  .extra-field .lbl{font-weight:700; font-size:13px;}
+  .checkbox-grid{display:grid; gap:6px; margin-top:8px;}
+  .checkbox-row{display:flex; align-items:center; gap:8px; font-size:13.5px;}
+  .checkbox-row input{accent-color:var(--primary);}
+
+  /* ---------- overview ---------- */
+  .overview-row{
+    display:flex; align-items:center; gap:12px;
+    padding:12px 6px; border-top:1px solid var(--border);
+  }
+  .overview-row:first-child{border-top:none;}
+  .overview-topic{width:34px;height:34px;border-radius:50%; background:var(--primary); color:#fff; display:flex;align-items:center;justify-content:center; flex:none;}
+  .overview-bar-track{flex:1; height:10px; border-radius:999px; background:var(--surface-muted); overflow:hidden;}
+  .overview-bar-fill{height:100%; background:var(--secondary); border-radius:999px;}
+  .overview-count{font-size:12.5px; color:var(--text-muted); width:64px; text-align:right; font-variant-numeric:tabular-nums;}
+  .pill{
+    display:inline-flex; align-items:center; gap:6px; font-size:12px; font-weight:700;
+    padding:4px 10px; border-radius:999px;
+  }
+  .pill-warn{background:var(--surface-warm); color:var(--warn-ink);}
+  .pill-ok{background:var(--surface-muted); color:var(--secondary);}
+
+  .signal-box{
+    background:var(--critical-bg); border:1.5px solid var(--critical);
+    border-radius:var(--radius-m); padding:14px 16px; margin-top:14px;
+    display:flex; gap:12px;
+  }
+  .signal-box svg{flex:none; color:var(--critical); margin-top:2px;}
+  .signal-box p{font-size:13.5px;}
+
+  /* ---------- results ---------- */
+  .result-hero{
+    background:linear-gradient(135deg, var(--brand-deep), var(--primary));
+    color:#EAF6F6; border-radius:var(--radius-l); padding:30px 32px; box-shadow:var(--shadow);
+    display:grid; grid-template-columns:1fr auto; gap:20px; align-items:center;
+  }
+  @media (max-width:640px){ .result-hero{grid-template-columns:1fr;} }
+  .result-hero .eyebrow{color:var(--accent);}
+  .result-hero h1{color:#fff; font-size:26px; margin-top:8px;}
+  .result-hero p{color:rgba(234,246,246,0.85); margin-top:10px; max-width:56ch; font-size:14.5px;}
+  .score-dial{
+    width:132px;height:132px;border-radius:50%;
+    background:rgba(255,255,255,0.08); border:2px solid rgba(255,255,255,0.25);
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    flex:none; justify-self:center;
+  }
+  .score-dial .num{font-family:var(--font-head); font-size:34px; font-weight:700; color:#fff; font-variant-numeric:tabular-nums;}
+  .score-dial .lbl{font-size:11px; color:rgba(234,246,246,0.75); text-transform:uppercase; letter-spacing:.06em;}
+
+  .band-note{
+    margin-top:14px; background:rgba(255,255,255,0.1); border-radius:var(--radius-s);
+    padding:10px 14px; font-size:13px; color:#fff;
+  }
+
+  .section-title{font-size:18px; margin-bottom:14px; display:flex; align-items:center; gap:8px;}
+
+  .bars{display:grid; gap:14px;}
+  .bar-row{display:grid; grid-template-columns:170px 1fr 54px; gap:12px; align-items:center;}
+  @media (max-width:600px){ .bar-row{grid-template-columns:1fr; gap:4px;} .bar-row .bar-val{justify-self:end;} }
+  .bar-label{font-size:13.5px; font-weight:700; display:flex; align-items:center; gap:8px;}
+  .bar-label .ic{width:24px;height:24px;border-radius:50%; background:var(--surface-muted); color:var(--primary); display:flex;align-items:center;justify-content:center; flex:none;}
+  .bar-track{height:14px; border-radius:999px; background:var(--surface-muted); position:relative; overflow:hidden;}
+  .bar-fill{height:100%; border-radius:999px; background:var(--primary);}
+  .bar-marker{position:absolute; top:-3px; bottom:-3px; width:2px; background:var(--critical); opacity:.55;}
+  .bar-val{font-variant-numeric:tabular-nums; font-weight:700; font-size:13.5px; text-align:right;}
+
+  .two-col{display:grid; grid-template-columns:1fr 1fr; gap:16px;}
+  @media (max-width:700px){ .two-col{grid-template-columns:1fr;} }
+
+  .attn-item, .strong-item{
+    display:flex; gap:12px; padding:12px 0; border-top:1px solid var(--border);
+  }
+  .attn-item:first-child, .strong-item:first-child{border-top:none;}
+  .attn-item svg{color:var(--accent); flex:none; margin-top:2px;}
+  .strong-item svg{color:var(--secondary); flex:none; margin-top:2px;}
+  .attn-item b, .strong-item b{font-size:14px; display:block;}
+  .attn-item span, .strong-item span{font-size:13px; color:var(--text-muted);}
+
+  .meta-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-top:6px;}
+  @media (max-width:600px){ .meta-grid{grid-template-columns:1fr 1fr;} }
+  .meta-tile{background:var(--surface-muted); border-radius:var(--radius-s); padding:10px 12px;}
+  .meta-tile .k{font-size:11px; text-transform:uppercase; letter-spacing:.05em; color:var(--text-muted); font-weight:700;}
+  .meta-tile .v{font-size:14px; font-weight:700; margin-top:2px;}
+
+  .result-actions{display:flex; flex-wrap:wrap; gap:10px; margin-top:20px;}
+
+  /* ---------- settings drawer ---------- */
+  .backdrop{
+    position:fixed; inset:0; background:rgba(1,20,22,0.5); z-index:30;
+    display:flex; justify-content:flex-end;
+  }
+  .drawer{
+    width:min(420px, 100%); background:var(--surface); height:100%; overflow-y:auto;
+    padding:24px; box-shadow:var(--shadow);
+  }
+  .drawer h3{font-size:17px;}
+  .drawer .lede{margin-top:6px;}
+  .settings-group{margin-top:20px; padding-top:16px; border-top:1px solid var(--border);}
+  .settings-group:first-of-type{border-top:none;}
+  .settings-group h4{font-size:13.5px; text-transform:uppercase; letter-spacing:.04em; color:var(--primary);}
+  .settings-row{display:flex; justify-content:space-between; align-items:center; gap:10px; margin-top:10px;}
+  .settings-row label{font-size:13px; color:var(--text); flex:1;}
+  .settings-row input{width:80px; text-align:right; margin-top:0;}
+  .drawer-close{position:sticky; top:0; float:right; background:var(--surface-muted); border:none; border-radius:999px; width:32px;height:32px; cursor:pointer; color:var(--text);}
+
+  .toast{
+    position:fixed; left:50%; bottom:24px; transform:translateX(-50%);
+    background:var(--brand-deep); color:#fff; padding:10px 18px; border-radius:999px;
+    font-size:13.5px; font-weight:600; box-shadow:var(--shadow); z-index:50;
+    opacity:0; pointer-events:none; transition:opacity .25s ease;
+  }
+  .toast.show{opacity:1;}
+
+  footer.credit{
+    text-align:center; color:var(--text-muted); font-size:12px; margin-top:28px;
+  }
+
+  @media print{
+    .topbar, .navbar, .result-actions, .no-print{display:none !important;}
+    body{background:#fff; color:#000;}
+    .card{box-shadow:none; border:1px solid #ccc;}
+  }
+</style>
+
+<div id="app"></div>
+<div id="toast" class="toast"></div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* =========================================================
+     ICONS (inline SVG, currentColor)
+  ========================================================= */
+  const ICONS = {
+    gear: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15a3 3 0 100-6 3 3 0 000 6z"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 11-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06A1.65 1.65 0 005 15a1.65 1.65 0 00-1.51-1H3.4a2 2 0 110-4h.09A1.65 1.65 0 005 8.6a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06A1.65 1.65 0 009 4.6c.6-.25 1-.84 1-1.51V3a2 2 0 114 0v.09c0 .67.4 1.26 1 1.51.66.28 1.39.14 1.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06c-.47.43-.61 1.16-.33 1.82.25.6.84 1 1.51 1H21a2 2 0 110 4h-.09c-.67 0-1.26.4-1.51 1z"/></svg>',
+    lightbulb: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 00-4 12.7c.6.5 1 1.2 1 2.05V17h6v-.25c0-.85.4-1.55 1-2.05A7 7 0 0012 2z"/></svg>',
+    ear: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9a6 6 0 1112 0c0 3-2 4-2 7a3 3 0 01-6 0"/><path d="M10 15a2 2 0 004 0"/></svg>',
+    service: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21v-2a2 2 0 012-2h2a2 2 0 012 2v2"/><path d="M12 3a5 5 0 015 5v3H7V8a5 5 0 015-5z"/><path d="M3 13h18"/></svg>',
+    route: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="19" r="2.2"/><circle cx="18" cy="5" r="2.2"/><path d="M6 16.8V13a4 4 0 014-4h4a4 4 0 004-4"/></svg>',
+    target: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/></svg>',
+    cog: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M4 12h2m12 0h2M12 4v2m0 12v2M6.3 6.3l1.4 1.4m8.6 8.6l1.4 1.4M17.7 6.3l-1.4 1.4M7.7 16.3l-1.4 1.4"/></svg>',
+    arrowRight: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>',
+    arrowLeft: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 18l-6-6 6-6"/></svg>',
+    check: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>',
+    download: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0l-4-4m4 4l4-4M4 21h16"/></svg>',
+    print: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V3h12v6"/><rect x="4" y="9" width="16" height="8" rx="1.5"/><path d="M6 17v4h12v-4"/></svg>',
+    alert: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9L1.8 18a2 2 0 001.7 3h17a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z"/></svg>',
+    star: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9L5.7 21l1.7-7-5.4-4.7 7.1-.6L12 2z"/></svg>',
+    focus: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-3.8-3.8"/></svg>',
+    users: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>'
+  };
+
+  /* =========================================================
+     CONFIGURATION — instelbare grenswaarden
+  ========================================================= */
+  const DEFAULT_CONFIG = {
+    modelVersion: "1.0",
+    vragenlijstVersion: "1.0",
+    startT1: 35,   // < T1 => Klantbeeld ontwikkelen
+    startT2: 70,   // >= T2 => Klantbediening differentiëren (voor controles)
+    gedeeldA_min: 6,    // A minimaal 6 van 12
+    gedeeldA1_min: 1,   // A1 minimaal 1 punt
+    diffA_min: 8,   // A minimaal 8 van 12 (65%)
+    diffB_min: 3,   // B minimaal 3 van 6 (50%)
+    diffD_min: 4,   // D minimaal 4 van 6 (65%)
+    diffE_min: 6,   // E minimaal 6 van 8 (65%)
+    diffF_min: 7    // F minimaal 7 van 10 (65%)
+  };
+  const SETTINGS_KEY = "klantbeeldscan-config-v1";
+  function loadConfig(){
+    try{
+      const raw = localStorage.getItem(SETTINGS_KEY);
+      if(raw){ return Object.assign({}, DEFAULT_CONFIG, JSON.parse(raw)); }
+    }catch(e){}
+    return Object.assign({}, DEFAULT_CONFIG);
+  }
+  function saveConfig(cfg){
+    try{ localStorage.setItem(SETTINGS_KEY, JSON.stringify(cfg)); }catch(e){}
+  }
+  let CONFIG = loadConfig();
+
+  /* =========================================================
+     TOPIC DEFINITIONS
+  ========================================================= */
+  const TOPICS = [
+    { id:"A", title:"Wat weten we over onze klanten?", icon:"lightbulb", max:12,
+      action:"Klantkennis bundelen, verschillen tussen klanten beschrijven en ontbrekende informatie bepalen." },
+    { id:"B", title:"Hoe horen we wat klanten ervaren?", icon:"ear", max:6,
+      action:"Gericht ervaringen ophalen bij verschillende klanten en opvolging afspreken." },
+    { id:"C", title:"Hoe bedienen we onze klanten?", icon:"service", max:6,
+      action:"Verwachtingen en serviceafspraken verduidelijken en passende verschillen in bediening onderzoeken." },
+    { id:"D", title:"Welke stappen doorloopt de klant en hoe sluiten wij daarop aan?", icon:"route", max:6,
+      action:"Klantstappen beschrijven en verbinden aan werk, overdrachten en verantwoordelijkheden." },
+    { id:"E", title:"Welke gezamenlijke keuzes en doelen hebben we?", icon:"target", max:8,
+      action:"Gezamenlijke keuzes vertalen naar concrete doelen en werkafspraken." },
+    { id:"F", title:"Wie neemt verantwoordelijkheid en hoe verbeteren we?", icon:"cog", max:10,
+      action:"Verantwoordelijkheden, besluitvorming, capaciteit en vaste opvolging organiseren." }
+  ];
+  const TOPIC_MAP = Object.fromEntries(TOPICS.map(t=>[t.id,t]));
+
+  /* =========================================================
+     QUESTIONS — volledige vragenlijst (sectie 5 van de specificatie)
+  ========================================================= */
+  const QUESTIONS = [
+    { id:"A1", topic:"A", text:"Hoe leggen jullie kennis over klanten vast en delen jullie die?",
+      o0:"Vooral in hoofden, mailboxen en persoonlijke notities.",
+      o1:"Een deel is gezamenlijk vastgelegd, maar informatie is onvolledig of wordt wisselend gebruikt.",
+      o2:"Relevante kennis is gedeeld, wordt bijgehouden en gebruikt bij beslissingen." },
+    { id:"A2", topic:"A", text:"Hoe bepalen jullie welke klanten aandacht krijgen?",
+      o0:"Medewerkers bepalen dit vooral naar eigen inzicht.",
+      o1:"We gebruiken gezamenlijke criteria, vooral hoeveel klanten besteden of opleveren.",
+      o2:"We gebruiken gezamenlijke criteria en betrekken ook wat klanten nodig hebben, hun gedrag en verwachte ontwikkeling." },
+    { id:"A3", topic:"A", text:"Hoe volgen jullie veranderingen bij klanten?",
+      o0:"Vooral als een medewerker iets opmerkt of een klant iets meldt.",
+      o1:"We bekijken periodiek enkele gegevens, maar verbinden daar beperkt acties aan.",
+      o2:"We combineren gegevens en gesprekken en passen onze aanpak aan wanneer behoeften veranderen." },
+    { id:"A4", topic:"A", text:"Welke verschillen zien jullie tussen klanten in wat zij nodig hebben en hoe zij kiezen of jullie dienstverlening gebruiken?",
+      o0:"We maken weinig onderscheid, of medewerkers hebben ieder hun eigen beeld.",
+      o1:"We herkennen verschillende klanttypen, maar hebben de verschillen beperkt beschreven of onderzocht.",
+      o2:"We hebben relevante verschillen beschreven en toetsen bij klanten of deze herkenbaar zijn." },
+    { id:"A5", topic:"A", text:"Welke gegevens leggen jullie over klanten vast?",
+      o0:"Vooral contactgegevens, afspraken en bestellingen.",
+      o1:"Ook bijvoorbeeld omzet, marge, contactgeschiedenis en klachten.",
+      o2:"Daarnaast ook wat klanten nodig hebben, belangrijk vinden en ervaren, voor zover relevant voor onze dienstverlening." },
+    { id:"A6", topic:"A", text:"Waar leggen jullie klantinformatie vast en hoe gebruiken collega's die?",
+      o0:"Vooral in persoonlijke bestanden, mailboxen of losse systemen.",
+      o1:"Er is een gezamenlijke plek, maar informatie is onvolledig of wordt niet consequent bijgehouden en gebruikt.",
+      o2:"Er is een gezamenlijke werkwijze en plek waar betrokken collega's relevante informatie bijhouden en gebruiken.",
+      extra:{
+        label:"Welke systemen of hulpmiddelen gebruiken jullie voor klantinformatie? (niet gescoord)",
+        note:"De aanwezigheid van specifieke software levert op zichzelf geen extra punten op. A1 beoordeelt gedeelde kennis; A6 beoordeelt hoe de vastlegging en het gebruik zijn georganiseerd.",
+        options:["Een specifiek systeem voor klantinformatie en klantcontact.","Een systeem voor orders, administratie of bedrijfsvoering.","Gedeelde bestanden of spreadsheets.","Mailboxen en persoonlijke bestanden.","Anders, namelijk ...","Weet ik niet."],
+        optionalText:"Naam van het systeem (optioneel)"
+      } },
+
+    { id:"B1", topic:"B", text:"Hoe verzamelen jullie ervaringen van klanten?",
+      o0:"Via dagelijkse contacten en spontane reacties.",
+      o1:"We doen af en toe onderzoek of gerichte klantgesprekken.",
+      o2:"We verzamelen op vaste momenten ervaringen, passend bij wat we willen begrijpen." },
+    { id:"B2", topic:"B", text:"Van welke klanten horen jullie ervaringen?",
+      o0:"Vooral van klanten die zich uitspreken of die we goed kennen.",
+      o1:"We benaderen een bredere groep, maar missen nog relevante perspectieven.",
+      o2:"We betrekken bewust verschillende klanten en situaties, waaronder moeizame ervaringen of vertrekkende klanten." },
+    { id:"B3", topic:"B", text:"Wat gebeurt er met wat klanten vertellen?",
+      o0:"We lossen vooral individuele situaties op.",
+      o1:"We bespreken uitkomsten en starten soms verbeteringen.",
+      o2:"Er volgen concrete acties met een eigenaar en we beoordelen of ze effect hebben." },
+
+    { id:"C1", topic:"C", text:"Hoe bepalen jullie welke aandacht, hulp en dienstverlening een klant krijgt?",
+      o0:"We bieden meestal hetzelfde, of medewerkers bepalen dit zelf.",
+      o1:"We hebben afspraken voor verschillende klanten, vooral op basis van hoeveel zij bij ons besteden of opleveren.",
+      o2:"We maken keuzes op basis van wat klanten nodig hebben, hun waarde voor onze organisatie en wat wij kunnen uitvoeren." },
+    { id:"C2", topic:"C", text:"Hoe zorgen jullie dat klanten weten wat zij mogen verwachten?",
+      o0:"Beloften en afspraken verschillen per medewerker.",
+      o1:"Belangrijke afspraken zijn beschreven, maar worden niet overal consequent toegepast.",
+      o2:"Beloften zijn duidelijk en uitvoerbaar en we volgen of we ze waarmaken." },
+    { id:"C3", topic:"C", text:"Hoe passen jullie de dienstverlening aan wanneer klantbehoeften veranderen?",
+      o0:"Vooral via uitzonderingen of individuele oplossingen.",
+      o1:"We passen onderdelen aan wanneer signalen zich opstapelen.",
+      o2:"We bespreken veranderende behoeften periodiek en passen dienstverlening en afspraken gericht aan." },
+
+    { id:"D1", topic:"D", text:"In hoeverre weten jullie welke stappen klanten doorlopen wanneer zij zich oriënteren, kiezen, kopen, gebruiken, hulp nodig hebben en opnieuw kiezen?",
+      o0:"Medewerkers kennen vooral de momenten waarop zij zelf contact hebben met klanten.",
+      o1:"We hebben de stappen gezamenlijk beschreven, vooral vanuit onze eigen ervaring.",
+      o2:"We hebben de stappen beschreven, bij klanten getoetst en passen het beeld aan wanneer ervaringen veranderen." },
+    { id:"D2", topic:"D", text:"In hoeverre is duidelijk welk werk en welke overdrachten tussen collega's nodig zijn om klanten tijdens deze stappen goed te helpen?",
+      o0:"Dit is niet gezamenlijk vastgelegd.",
+      o1:"Voor enkele contactmomenten is duidelijk welk werk en welke overdrachten nodig zijn.",
+      o2:"Voor de belangrijkste contactmomenten zijn het werk, de overdrachten en verantwoordelijkheden vastgelegd." },
+    { id:"D3", topic:"D", text:"Hoe pakken jullie problemen tussen afdelingen aan die klanten raken?",
+      o0:"Medewerkers lossen ze per geval op.",
+      o1:"Terugkerende problemen worden besproken, maar opvolging is wisselend.",
+      o2:"Een verantwoordelijke coördineert verbeteringen over afdelingen heen en volgt het resultaat." },
+
+    { id:"E1", topic:"E", text:"Welke gezamenlijke keuzes zijn er over klanten en wat jullie hun willen bieden?",
+      o0:"We willen klantgericht werken, maar keuzes zijn nauwelijks beschreven.",
+      o1:"Er zijn losse afspraken over klanten of dienstverlening.",
+      o2:"Er zijn samenhangende keuzes vastgelegd over wie we bedienen, wat we beloven en hoe we dat organiseren." },
+    { id:"E2", topic:"E", text:"Hoe vertalen jullie deze keuzes naar dagelijks werk?",
+      o0:"Medewerkers geven daar vooral zelf invulling aan.",
+      o1:"Sommige teams hebben doelen of acties, maar de samenhang is beperkt.",
+      o2:"Teams hebben passende doelen, afspraken en middelen die aansluiten op de gezamenlijke keuzes." },
+    { id:"E3", topic:"E", text:"Hoe wegen jullie de gevolgen voor klanten mee in besluiten?",
+      o0:"Vooral als iemand het ter sprake brengt.",
+      o1:"Bij grotere besluiten bespreken we mogelijke gevolgen voor klanten.",
+      o2:"Wat we over klanten weten wordt consequent gebruikt bij keuzes over dienstverlening, werkprocessen en investeringen." },
+    { id:"E4", topic:"E", text:"Welke concrete doelen hebben jullie voor wat klanten ervaren en hun relatie met de organisatie?",
+      o0:"We hebben hiervoor geen meetbare doelen.",
+      o1:"We volgen enkele uitkomsten, maar hebben niet overal afgesproken wat we willen bereiken en wanneer.",
+      o2:"We hebben concrete doelen en termijnen, bijvoorbeeld voor tevredenheid, blijven of opnieuw kopen, of het gemak waarmee klanten iets geregeld krijgen." },
+
+    { id:"F1", topic:"F", text:"Wie neemt in de praktijk het initiatief als de ervaring van klanten moet verbeteren?",
+      o0:"Vooral enkele betrokken medewerkers.",
+      o1:"Vooral één afdeling of een tijdelijke groep met collega's uit verschillende afdelingen.",
+      o2:"Collega's uit meerdere afdelingen nemen initiatief en het MT bespreekt en ondersteunt gezamenlijke prioriteiten." },
+    { id:"F2", topic:"F", text:"Hoe is vastgelegd wie verantwoordelijk is voor de ervaring van klanten?",
+      o0:"Dit is niet vastgelegd of hangt aan één medewerker, zonder duidelijke afspraken over bevoegdheden en opvolging.",
+      o1:"Er zijn afspraken binnen of tussen afdelingen, bijvoorbeeld in een werkgroep, maar besluitvorming of MT-verantwoordelijkheid is niet volledig vastgelegd.",
+      o2:"Verantwoordelijkheden en bevoegdheden zijn vastgelegd over betrokken afdelingen heen, met een benoemde verantwoordelijke in het MT.",
+      extra:{
+        label:"Waar is de verantwoordelijkheid belegd? (niet gescoord)",
+        note:"De organisatievorm alleen bepaalt de score niet. Bepalend is of duidelijk is wie beslist, wie uitvoert en wie opvolgt.",
+        options:["Bij een individuele medewerker.","Binnen één afdeling.","Over meerdere afdelingen.","Bij een tijdelijke projectgroep of taskforce.","Bij een vaste werkgroep.","In het MT.","Niet vastgelegd.","Weet ik niet."],
+        optionalText:"Betrokken functies, afdelingen en afspraken over besluitvorming (optioneel)"
+      } },
+    { id:"F3", topic:"F", text:"Hoe organiseren jullie verbeteringen?",
+      o0:"We reageren vooral op problemen van de dag.",
+      o1:"Er zijn verbeterprojecten, maar tijd en opvolging zijn wisselend.",
+      o2:"Er is een vast ritme met prioriteiten, eigenaren en beschikbare capaciteit." },
+    { id:"F4", topic:"F", text:"Hoe beoordelen jullie of een verbetering werkt?",
+      o0:"Vooral op gevoel of doordat klachten afnemen, zonder vaste vergelijking.",
+      o1:"We volgen acties en enkele resultaten, maar vergelijken niet consequent.",
+      o2:"We vergelijken met de beginsituatie en beoordelen het effect voor klant én organisatie." },
+    { id:"F5", topic:"F", text:"Wat gebeurt er wanneer de resultaten achterblijven bij jullie klantdoelen?",
+      o0:"We hebben geen meetbare klantdoelen, of er is geen vaste bespreking en opvolging.",
+      o1:"We bespreken de resultaten, maar acties en opvolging verschillen per keer.",
+      o2:"De verantwoordelijken bespreken afwijkingen, besluiten over acties en middelen en volgen of de resultaten verbeteren." }
+  ];
+  const Q_MAP = Object.fromEntries(QUESTIONS.map(q=>[q.id,q]));
+  const TOTAL_QUESTIONS = QUESTIONS.length; // 24
+
+  const START_ADVICE_TEXT = {
+    develop:{
+      label:"Klantbeeld ontwikkelen",
+      body:"Begin met het samenbrengen van wat jullie over klanten weten. Maak verschillen in beelden en aannames zichtbaar en bepaal welke informatie nog nodig is."
+    },
+    improve:{
+      label:"Klantbediening verbeteren",
+      body:"Er is een basis om op voort te bouwen. Richt de volgende stap op het beter verbinden van klantinzicht, dienstverlening, werkafspraken en verantwoordelijkheid."
+    },
+    differentiate:{
+      label:"Klantbediening differentiëren",
+      body:"Er zijn voldoende bouwstenen om verschillen tussen klanten te vertalen naar passende dienstverlening. Onderzoek welke verschillen waarde toevoegen en uitvoerbaar zijn. Waar dit al gebeurt, ligt de nadruk op toetsen en verfijnen."
+    }
+  };
+
+  /* =========================================================
+     STATE
+  ========================================================= */
+  const SCREENS = ["intro","orgdata", ...TOPICS.map(t=>"block-"+t.id), "overview","results"];
+
+  const state = {
+    screenIndex: 0,
+    answers: {}, // qid -> {status:'onbeantwoord'|'weet_niet'|'beantwoord', points:null|0|1|2, toelichting:''}
+    extra: { A6:{checked:[], other:"", systeemNaam:""}, F2:{checked:[], other:"", toelichting:""} },
+    org: { naam:"", rol:"", invuller:"", invulwijze:"", betrokken:"", aanleiding:"" },
+    settingsOpen:false,
+    toelichtOpen:{}
+  };
+  QUESTIONS.forEach(q=>{ state.answers[q.id] = {status:"onbeantwoord", points:null, toelichting:""}; });
+
+  function screenName(){ return SCREENS[state.screenIndex]; }
+
+  /* =========================================================
+     SCORING ENGINE
+  ========================================================= */
+  function topicQuestions(topicId){ return QUESTIONS.filter(q=>q.topic===topicId); }
+
+  function rawTopicPoints(topicId, bound){
+    // bound: null (only answered), 0 (missing->0), 2 (missing->2)
+    let sum = 0;
+    topicQuestions(topicId).forEach(q=>{
+      const a = state.answers[q.id];
+      if(a.status==="beantwoord"){ sum += a.points; }
+      else if(bound!==null){ sum += bound; }
+    });
+    return sum;
+  }
+
+  function topicPercent(topicId, bound){
+    const max = TOPIC_MAP[topicId].max;
+    return (rawTopicPoints(topicId, bound) / max) * 100;
+  }
+
+  function totalScore(bound){
+    const perc = TOPICS.map(t=>topicPercent(t.id, bound));
+    return perc.reduce((a,b)=>a+b,0) / perc.length;
+  }
+
+  function missingCount(){
+    return QUESTIONS.filter(q=>state.answers[q.id].status!=="beantwoord").length;
+  }
+
+  function isComplete(){ return missingCount()===0; }
+
+  function pointsOf(qid){
+    const a = state.answers[qid];
+    return a.status==="beantwoord" ? a.points : null;
+  }
+
+  // Decision procedure (sectie 6/7.3), executed only when isComplete()
+  function computeAdvice(){
+    const total = totalScore(null);
+    const aRaw = rawTopicPoints("A", null);
+    const a1 = pointsOf("A1");
+    const failedGedeeld = (aRaw < CONFIG.gedeeldA_min) || (a1 < CONFIG.gedeeldA1_min);
+
+    const diffChecks = [
+      { key:"A", label:"Klantinzicht (A)", need:CONFIG.diffA_min, max:12, have:rawTopicPoints("A",null) },
+      { key:"B", label:"Klantonderzoek (B)", need:CONFIG.diffB_min, max:6, have:rawTopicPoints("B",null) },
+      { key:"D", label:"Klantstappen en processen (D)", need:CONFIG.diffD_min, max:6, have:rawTopicPoints("D",null) },
+      { key:"E", label:"Gezamenlijke keuzes en doelen (E)", need:CONFIG.diffE_min, max:8, have:rawTopicPoints("E",null) },
+      { key:"F", label:"Verantwoordelijkheid en verbeteren (F)", need:CONFIG.diffF_min, max:10, have:rawTopicPoints("F",null) }
+    ];
+    const failedDiffTopics = diffChecks.filter(c=>c.have < c.need);
+    const guardQuestions = [
+      { id:"A4", label:"Verschillende klanttypen en behoeften herkennen (A4)" },
+      { id:"F2", label:"Verantwoordelijkheid formeel beleggen (F2)" },
+      { id:"E4", label:"Meetbare klantdoelen vaststellen (E4)" },
+      { id:"F5", label:"Bijsturen op resultaten (F5)" }
+    ];
+    const failedGuards = guardQuestions.filter(g=>pointsOf(g.id) < 1);
+    const failedDiff = failedDiffTopics.length>0 || failedGuards.length>0;
+
+    let code, reasons=[];
+    if(total < CONFIG.startT1){
+      code="develop";
+    } else if(failedGedeeld){
+      code="develop";
+      if(aRaw < CONFIG.gedeeldA_min) reasons.push("Klantinzicht (A) heeft "+aRaw+" van 12 punten; nodig is minimaal "+CONFIG.gedeeldA_min+".");
+      if(a1 < CONFIG.gedeeldA1_min) reasons.push("De vraag over het vastleggen en delen van klantkennis (A1) heeft 0 punten.");
+    } else if(total < CONFIG.startT2){
+      code="improve";
+    } else if(failedDiff){
+      code="improve";
+      failedDiffTopics.forEach(c=>reasons.push(c.label+" heeft "+c.have+" van "+c.max+" punten; nodig is minimaal "+c.need+"."));
+      failedGuards.forEach(g=>reasons.push(g.label+" heeft 0 punten."));
+    } else {
+      code="differentiate";
+    }
+
+    // tegenstrijdigheid signal
+    const contradiction = (pointsOf("E4")===0) && (pointsOf("F5")>=1);
+
+    return { total, code, reasons, contradiction, failedGedeeld, failedDiff, aRaw, a1 };
+  }
+
+  function attentionPoints(advice){
+    const items = [];
+    // 1. reasons that changed the advice
+    advice.reasons.slice(0,3).forEach(r=>items.push({title:"Voorwaarde ontbreekt", detail:r}));
+    if(items.length>=3) return items.slice(0,3);
+
+    // 2. overige onderwerpen met laagste percentages (niet perfect, order A-F for ties)
+    const perc = TOPICS.map(t=>({ id:t.id, pct:topicPercent(t.id,null) }));
+    perc.sort((a,b)=> a.pct-b.pct || (a.id<b.id?-1:1));
+    for(const p of perc){
+      if(items.length>=3) break;
+      if(p.pct>=100) continue; // already maximal, not an attention point
+      // avoid duplicate topic already referenced in reasons text
+      const already = advice.reasons.some(r=>r.includes("("+p.id+")") || r.includes(p.id+")"));
+      if(already) continue;
+      const qs = topicQuestions(p.id).filter(q=>pointsOf(q.id)!==null);
+      let lowestQ = null;
+      qs.forEach(q=>{ const pts = pointsOf(q.id); if(lowestQ===null || pts < pointsOf(lowestQ.id)) lowestQ = q; });
+      if(lowestQ){
+        items.push({ title: TOPIC_MAP[p.id].title, detail: TOPIC_MAP[p.id].action });
+      }
+    }
+    return items.slice(0,3);
+  }
+
+  function strongBuildingBlocks(){
+    return QUESTIONS.filter(q=>pointsOf(q.id)===2).map(q=>({ id:q.id, topic:q.topic, text:q.text }));
+  }
+
+  /* =========================================================
+     RENDER HELPERS
+  ========================================================= */
+  const app = document.getElementById("app");
+  function el(tag, attrs, children){
+    const n = document.createElement(tag);
+    if(attrs) Object.entries(attrs).forEach(([k,v])=>{
+      if(k==="html"){ n.innerHTML = v; }
+      else if(k==="class"){ n.className = v; }
+      else if(k.startsWith("on")){ n.addEventListener(k.slice(2), v); }
+      else n.setAttribute(k, v);
+    });
+    (children||[]).forEach(c=>{ if(c) n.appendChild(typeof c==="string"?document.createTextNode(c):c); });
+    return n;
+  }
+  function fmt1(n){ return (Math.round(n*10)/10).toLocaleString("nl-NL",{minimumFractionDigits:1,maximumFractionDigits:1}); }
+  function toast(msg){
+    const t = document.getElementById("toast");
+    t.textContent = msg; t.classList.add("show");
+    clearTimeout(toast._t);
+    toast._t = setTimeout(()=>t.classList.remove("show"), 2400);
+  }
+
+  function renderTopbar(){
+    const bar = el("div",{class:"topbar"});
+    bar.appendChild(el("div",{class:"brand"},[el("span",{class:"dot"}),"Klantbeeldscan"]));
+    const stepper = el("div",{class:"stepper"});
+    const labels = ["Intro","Gegevens", ...TOPICS.map(t=>t.id), "Overzicht","Resultaat"];
+    labels.forEach((lab,i)=>{
+      const cls = i<state.screenIndex ? "step done" : (i===state.screenIndex ? "step current" : "step");
+      stepper.appendChild(el("div",{class:cls, title:lab}, [i<state.screenIndex && i!==state.screenIndex ? "" : ""] ));
+    });
+    // fill step content separately (icons/labels) for clarity
+    Array.from(stepper.children).forEach((node,i)=>{ node.textContent = (i===0?"i": i===1?"O": i===labels.length-2?"Ov": i===labels.length-1?"R": labels[i]); });
+    bar.appendChild(stepper);
+    bar.appendChild(el("button",{class:"gear", title:"Instellingen: grenswaarden aanpassen", onclick:openSettings, html:ICONS.gear}));
+    return bar;
+  }
+
+  function renderNav(opts){
+    const bar = el("div",{class:"navbar no-print"});
+    const backBtn = el("button",{class:"btn btn-ghost", html:ICONS.arrowLeft+" Terug", onclick:opts.onBack});
+    if(!opts.onBack) backBtn.style.visibility="hidden";
+    bar.appendChild(backBtn);
+    bar.appendChild(el("span",{class:"progress-text"}, [opts.progress||""]));
+    const spacer = el("div",{class:"spacer"});
+    bar.appendChild(spacer);
+    const nextBtn = el("button",{class:"btn btn-primary", html:(opts.nextLabel||"Volgende")+" "+ICONS.arrowRight, onclick:opts.onNext});
+    if(opts.nextDisabled) nextBtn.disabled = true;
+    bar.appendChild(nextBtn);
+    return bar;
+  }
+
+  function go(delta){ state.screenIndex = Math.max(0, Math.min(SCREENS.length-1, state.screenIndex+delta)); render(); window.scrollTo({top:0,behavior:"instant"}); }
+  function goTo(name){ state.screenIndex = SCREENS.indexOf(name); render(); window.scrollTo({top:0,behavior:"instant"}); }
+
+  /* =========================================================
+     SCREENS
+  ========================================================= */
+  function screenIntro(){
+    const wrap = el("div",{class:"center-col"});
+    const card = el("div",{class:"card intro-grid"});
+    const left = el("div");
+    left.appendChild(el("div",{class:"eyebrow"},["Organisatiescan · klantbeeld en klantbediening"]));
+    left.appendChild(el("h1",{},["Waar staat jullie organisatie in het begrijpen en bedienen van klanten?"]));
+    left.appendChild(el("p",{class:"lede"},["Beantwoord "+TOTAL_QUESTIONS+" vragen over hoe jullie op dit moment werken. Kies steeds het antwoord dat het beste past bij de dagelijkse praktijk, ook als er al plannen zijn om iets te veranderen."]));
+    left.appendChild(el("p",{class:"lede"},["Er zijn geen goede of foute antwoorden. De scan helpt bepalen waar een volgende stap het meeste aandacht verdient."]));
+    left.appendChild(el("p",{class:"lede"},["Weet je iets niet? Kies dan 'Weet ik niet'. Je kunt het antwoord later aanvullen."]));
+    left.appendChild(el("div",{style:"margin-top:20px;"},[
+      el("button",{class:"btn btn-primary", html:"Start de scan "+ICONS.arrowRight, onclick:()=>go(1)})
+    ]));
+    card.appendChild(left);
+
+    const right = el("div",{class:"startpoints"});
+    right.appendChild(el("div",{class:"eyebrow", style:"margin-bottom:2px;"},["Mogelijke uitkomsten"]));
+    const sp = [
+      {icon:ICONS.focus, t:"Klantbeeld ontwikkelen", d:"Persoonlijke kennis samenbrengen en aannames zichtbaar maken."},
+      {icon:ICONS.route, t:"Klantbediening verbeteren", d:"Klantinzicht vertalen naar betere dienstverlening en afspraken."},
+      {icon:ICONS.star, t:"Klantbediening differentiëren", d:"Verschillen tussen klanten vertalen naar passende bediening."}
+    ];
+    sp.forEach(s=>{
+      right.appendChild(el("div",{class:"startpoint"},[
+        el("span",{html:s.icon, style:"color:var(--primary)"}),
+        el("div",{},[ el("b",{},[s.t]), el("span",{},[s.d]) ])
+      ]));
+    });
+    card.appendChild(right);
+    wrap.appendChild(card);
+    return wrap;
+  }
+
+  function fieldText(labelText, required, value, onInput, hint){
+    const wrap = el("label",{class:"field"});
+    wrap.appendChild(el("span",{class:"lbl"},[labelText, required?el("span",{class:"req"},["*"]):null]));
+    const input = el("input",{type:"text", value:value||""});
+    input.addEventListener("input", e=>onInput(e.target.value));
+    wrap.appendChild(input);
+    if(hint) wrap.appendChild(el("div",{class:"hint"},[hint]));
+    return wrap;
+  }
+  function fieldSelect(labelText, required, value, options, onInput){
+    const wrap = el("label",{class:"field"});
+    wrap.appendChild(el("span",{class:"lbl"},[labelText, required?el("span",{class:"req"},["*"]):null]));
+    const sel = el("select",{});
+    sel.appendChild(el("option",{value:""},["Kies..."]));
+    options.forEach(o=>{
+      const opt = el("option",{value:o},[o]);
+      if(o===value) opt.selected = true;
+      sel.appendChild(opt);
+    });
+    sel.addEventListener("change", e=>onInput(e.target.value));
+    wrap.appendChild(sel);
+    return wrap;
+  }
+
+  function screenOrgData(){
+    const wrap = el("div",{class:"center-col card"});
+    wrap.appendChild(el("div",{class:"eyebrow"},["Gegevens bij de scan"]));
+    wrap.appendChild(el("h2",{},["Over de invulling"]));
+    wrap.appendChild(el("p",{class:"lede"},["De scan kan zonder account of e-mailadres worden ingevuld. Deze gegevens identificeren de beoordeling en helpen de uitkomst later te duiden."]));
+
+    wrap.appendChild(fieldText("Organisatienaam", true, state.org.naam, v=>{state.org.naam=v; updateNav();}));
+    wrap.appendChild(fieldText("Functie of rol van de invuller", true, state.org.rol, v=>{state.org.rol=v; updateNav();}, "Bijvoorbeeld directie, marketing, verkoop, service of operatie."));
+    wrap.appendChild(fieldText("Naam invuller (optioneel)", false, state.org.invuller, v=>state.org.invuller=v, "Alleen invullen als dat nodig is."));
+    wrap.appendChild(fieldSelect("Invulwijze", true, state.org.invulwijze, ["Individueel","Gezamenlijk besproken"], v=>{state.org.invulwijze=v; updateNav();}));
+    wrap.appendChild(fieldText("Betrokken functies (bij gezamenlijke invulling)", false, state.org.betrokken, v=>state.org.betrokken=v, "Welke perspectieven zijn meegenomen?"));
+    wrap.appendChild(fieldText("Aanleiding (optioneel)", false, state.org.aanleiding, v=>state.org.aanleiding=v, "Waarom wordt de scan uitgevoerd?"));
+    return wrap;
+  }
+
+  function orgComplete(){
+    return state.org.naam.trim() && state.org.rol.trim() && state.org.invulwijze.trim();
+  }
+
+  function optionRow(q, val, label){
+    const a = state.answers[q.id];
+    const selected = a.status==="beantwoord" && a.points===val;
+    const isUnknown = val==="unknown";
+    const row = el("label",{class:"option"+(selected?" selected":"")+(isUnknown?" unknown":"")});
+    const input = el("input",{type:"radio", name:"q-"+q.id});
+    if(selected) input.checked = true;
+    input.addEventListener("change", ()=>{
+      if(isUnknown){ a.status="weet_niet"; a.points=null; }
+      else { a.status="beantwoord"; a.points=val; }
+      render();
+    });
+    row.appendChild(input);
+    row.appendChild(el("span",{class:"opt-text"},[label]));
+    return row;
+  }
+
+  function renderQuestion(q){
+    const box = el("div",{class:"question"});
+    const head = el("p",{});
+    head.appendChild(el("span",{class:"q-id"},[q.id]));
+    head.appendChild(el("span",{class:"q-text"},[q.text]));
+    box.appendChild(head);
+
+    const opts = el("div",{class:"options"});
+    opts.appendChild(optionRow(q,0,q.o0));
+    opts.appendChild(optionRow(q,1,q.o1));
+    opts.appendChild(optionRow(q,2,q.o2));
+    opts.appendChild(optionRow(q,"unknown","Weet ik niet"));
+    box.appendChild(opts);
+
+    const isOpen = !!state.toelichtOpen[q.id];
+    const toggle = el("button",{class:"toelicht-toggle", onclick:()=>{ state.toelichtOpen[q.id]=!isOpen; render(); }},
+      [isOpen ? "Toelichting verbergen" : "+ Toelichting toevoegen (optioneel)"]);
+    box.appendChild(toggle);
+    if(isOpen){
+      const tbox = el("div",{class:"toelicht-box"});
+      const ta = el("textarea",{placeholder:"Waar blijkt dit uit? Geef eventueel een recent voorbeeld."});
+      ta.value = state.answers[q.id].toelichting;
+      ta.addEventListener("input", e=>{ state.answers[q.id].toelichting = e.target.value; });
+      tbox.appendChild(ta);
+      box.appendChild(tbox);
+    }
+
+    if(q.extra){
+      const ex = el("div",{class:"extra-field"});
+      ex.appendChild(el("div",{class:"lbl"},[q.extra.label]));
+      const store = state.extra[q.id];
+      const grid = el("div",{class:"checkbox-grid"});
+      q.extra.options.forEach(opt=>{
+        const row = el("label",{class:"checkbox-row"});
+        const cb = el("input",{type:"checkbox"});
+        cb.checked = store.checked.includes(opt);
+        cb.addEventListener("change", ()=>{
+          if(cb.checked){ store.checked.push(opt); } else { store.checked = store.checked.filter(x=>x!==opt); }
+        });
+        row.appendChild(cb);
+        row.appendChild(document.createTextNode(opt));
+        grid.appendChild(row);
+      });
+      ex.appendChild(grid);
+      if(q.extra.optionalText){
+        const ti = el("input",{type:"text", placeholder:q.extra.optionalText, style:"margin-top:10px;"});
+        ti.value = store.other;
+        ti.addEventListener("input", e=>store.other = e.target.value);
+        ex.appendChild(ti);
+      }
+      ex.appendChild(el("div",{class:"hint", style:"margin-top:8px;"},[q.extra.note]));
+      box.appendChild(ex);
+    }
+    return box;
+  }
+
+  function screenBlock(topicId){
+    const t = TOPIC_MAP[topicId];
+    const wrap = el("div",{class:"center-col card"});
+    const head = el("div",{class:"topic-head"});
+    head.appendChild(el("div",{class:"topic-icon", html:ICONS[t.icon]}));
+    const headText = el("div");
+    headText.appendChild(el("div",{class:"eyebrow"},["Onderwerp "+t.id]));
+    headText.appendChild(el("h2",{class:"topic-title"},[t.title]));
+    head.appendChild(headText);
+    wrap.appendChild(head);
+    const qs = topicQuestions(topicId);
+    wrap.appendChild(el("p",{class:"topic-sub"},[qs.length+" vragen · maximaal "+t.max+" punten"]));
+    qs.forEach(q=>wrap.appendChild(renderQuestion(q)));
+    return wrap;
+  }
+
+  function blockComplete(topicId){
+    return topicQuestions(topicId).every(q=>state.answers[q.id].status!=="onbeantwoord");
+  }
+
+  function screenOverview(){
+    const wrap = el("div",{class:"center-col"});
+    const card = el("div",{class:"card"});
+    card.appendChild(el("div",{class:"eyebrow"},["Antwoordoverzicht"]));
+    card.appendChild(el("h2",{},["Controleer jullie antwoorden"]));
+    card.appendChild(el("p",{class:"lede"},["Per onderwerp zie je hoeveel vragen zijn beantwoord. Klik op een onderwerp om terug te gaan en antwoorden aan te vullen of te wijzigen."]));
+
+    const list = el("div",{style:"margin-top:14px;"});
+    TOPICS.forEach(t=>{
+      const qs = topicQuestions(t.id);
+      const answered = qs.filter(q=>state.answers[q.id].status!=="onbeantwoord").length;
+      const row = el("div",{class:"overview-row", style:"cursor:pointer;", onclick:()=>goTo("block-"+t.id)});
+      row.appendChild(el("div",{class:"overview-topic", html:ICONS[t.icon]}));
+      const mid = el("div",{style:"flex:1;"});
+      mid.appendChild(el("div",{style:"font-weight:700; font-size:14px;"},[t.id+". "+t.title]));
+      const track = el("div",{class:"overview-bar-track", style:"margin-top:6px;"});
+      track.appendChild(el("div",{class:"overview-bar-fill", style:"width:"+(answered/qs.length*100)+"%;"}));
+      mid.appendChild(track);
+      row.appendChild(mid);
+      row.appendChild(el("div",{class:"overview-count"},[answered+" / "+qs.length]));
+      row.appendChild(answered===qs.length ? el("span",{class:"pill pill-ok", html:ICONS.check+" compleet"}) : el("span",{class:"pill pill-warn"},["nog "+(qs.length-answered)]));
+      list.appendChild(row);
+    });
+    card.appendChild(list);
+
+    const missing = missingCount();
+    if(missing>0){
+      const lo = totalScore(0), hi = totalScore(2);
+      const box = el("div",{class:"band-note", style:"background:var(--surface-warm); color:var(--text);"});
+      box.appendChild(el("p",{},["Je voorlopige score ligt tussen "+fmt1(lo)+" en "+fmt1(hi)+". Voor een volledig startadvies "+(missing===1?"ontbreekt nog 1 antwoord.":"ontbreken nog "+missing+" antwoorden.")]));
+      card.appendChild(box);
+    }
+
+    const advicePreview = isComplete() ? computeAdvice() : null;
+    if(advicePreview && advicePreview.contradiction){
+      const sig = el("div",{class:"signal-box"});
+      sig.appendChild(el("span",{html:ICONS.alert}));
+      sig.appendChild(el("p",{},["Je geeft aan dat er geen meetbare klantdoelen zijn (E4), maar ook dat jullie resultaten met die doelen vergelijken of erop bijsturen (F5). Wil je deze antwoorden nog eens bekijken? De antwoorden worden niet automatisch gewijzigd; dit blijft een bespreekpunt bij de uitkomst."]));
+      card.appendChild(sig);
+    }
+
+    wrap.appendChild(card);
+    return wrap;
+  }
+
+  function screenResults(){
+    const advice = computeAdvice();
+    const wrap = el("div",{});
+    const hero = el("div",{class:"result-hero"});
+    const left = el("div");
+    left.appendChild(el("div",{class:"eyebrow"},["Aanbevolen startpunt"]));
+    left.appendChild(el("h1",{},[START_ADVICE_TEXT[advice.code].label]));
+    left.appendChild(el("p",{},[START_ADVICE_TEXT[advice.code].body]));
+    if(advice.reasons.length){
+      const rb = el("div",{class:"band-note"});
+      rb.appendChild(el("p",{style:"font-weight:700; margin-bottom:4px;"},["De totaalscore wijst richting een volgende stap, maar:"]));
+      advice.reasons.forEach(r=>rb.appendChild(el("p",{style:"margin-top:4px;"},["• "+r])));
+      left.appendChild(rb);
+    }
+    hero.appendChild(left);
+    const dial = el("div",{class:"score-dial"});
+    dial.appendChild(el("div",{class:"num"},[fmt1(advice.total)]));
+    dial.appendChild(el("div",{class:"lbl"},["van de 100"]));
+    hero.appendChild(dial);
+    wrap.appendChild(hero);
+
+    if(advice.contradiction){
+      const sig = el("div",{class:"signal-box", style:"margin-top:16px;"});
+      sig.appendChild(el("span",{html:ICONS.alert}));
+      sig.appendChild(el("p",{},["Signaal: geen meetbare klantdoelen (E4), maar wel bespreking of bijsturing op resultaten (F5). Dit blijft een bespreekpunt bij de uitkomst; de antwoorden zijn niet gewijzigd."]));
+      wrap.appendChild(sig);
+    }
+
+    const barsCard = el("div",{class:"card", style:"margin-top:16px;"});
+    barsCard.appendChild(el("div",{class:"section-title"},["Onderwerpscores"]));
+    const bars = el("div",{class:"bars"});
+    TOPICS.forEach(t=>{
+      const pct = topicPercent(t.id, null);
+      const row = el("div",{class:"bar-row"});
+      row.appendChild(el("div",{class:"bar-label"},[el("span",{class:"ic", html:ICONS[t.icon]}), t.id+". "+t.title.split("?")[0]]));
+      const track = el("div",{class:"bar-track"});
+      track.appendChild(el("div",{class:"bar-fill", style:"width:"+Math.max(pct,2)+"%;"}));
+      row.appendChild(track);
+      row.appendChild(el("div",{class:"bar-val"},[fmt1(pct)]));
+      bars.appendChild(row);
+    });
+    barsCard.appendChild(bars);
+    wrap.appendChild(barsCard);
+
+    const twoCol = el("div",{class:"two-col", style:"margin-top:16px;"});
+
+    const attnCard = el("div",{class:"card"});
+    attnCard.appendChild(el("div",{class:"section-title"},[el("span",{html:ICONS.focus, style:"color:var(--accent)"}),"Aandachtspunten"]));
+    const pts = attentionPoints(advice);
+    if(pts.length===0){
+      attnCard.appendChild(el("p",{class:"lede"},["Jullie scoren op alle onderdelen het maximum. Toets in de praktijk of dit beeld klopt en verfijn de aanpak waar nodig."]));
+    } else {
+      pts.forEach(p=>{
+        const it = el("div",{class:"attn-item"});
+        it.appendChild(el("span",{html:ICONS.alert}));
+        it.appendChild(el("div",{},[el("b",{},[p.title]), el("span",{},[p.detail])]));
+        attnCard.appendChild(it);
+      });
+    }
+    twoCol.appendChild(attnCard);
+
+    const strongCard = el("div",{class:"card"});
+    strongCard.appendChild(el("div",{class:"section-title"},[el("span",{html:ICONS.star, style:"color:var(--secondary)"}),"Aanwezige bouwstenen"]));
+    const strong = strongBuildingBlocks();
+    if(strong.length===0){
+      strongCard.appendChild(el("p",{class:"lede"},["Nog geen antwoorden op het maximale niveau."]));
+    } else {
+      const byTopic = {};
+      strong.forEach(s=>{ (byTopic[s.topic]=byTopic[s.topic]||[]).push(s); });
+      Object.keys(byTopic).sort().forEach(tid=>{
+        const it = el("div",{class:"strong-item"});
+        it.appendChild(el("span",{html:ICONS.check}));
+        it.appendChild(el("div",{},[
+          el("b",{},[TOPIC_MAP[tid].title]),
+          el("span",{},[byTopic[tid].length+" van "+topicQuestions(tid).length+" vragen op maximaal niveau."])
+        ]));
+        strongCard.appendChild(it);
+      });
+    }
+    twoCol.appendChild(strongCard);
+    wrap.appendChild(twoCol);
+
+    const metaCard = el("div",{class:"card", style:"margin-top:16px;"});
+    metaCard.appendChild(el("div",{class:"section-title"},["Gegevens van deze beoordeling"]));
+    const grid = el("div",{class:"meta-grid"});
+    const items = [
+      ["Organisatie", state.org.naam || "—"],
+      ["Rol invuller", state.org.rol || "—"],
+      ["Invulwijze", state.org.invulwijze || "—"],
+      ["Datum", new Date().toLocaleDateString("nl-NL",{day:"numeric",month:"long",year:"numeric"})],
+      ["Vragenlijstversie", CONFIG.vragenlijstVersion],
+      ["Scoremodelversie", CONFIG.modelVersion]
+    ];
+    items.forEach(([k,v])=>grid.appendChild(el("div",{class:"meta-tile"},[el("div",{class:"k"},[k]), el("div",{class:"v"},[v])])));
+    metaCard.appendChild(grid);
+    metaCard.appendChild(el("p",{class:"hint", style:"margin-top:12px;"},["Dit is een onderbouwde zelfbeoordeling en een vertrekpunt voor het intakegesprek — geen gevalideerd meetinstrument. Bespreek de onderbouwing tijdens de intake."]));
+
+    const actions = el("div",{class:"result-actions no-print"});
+    actions.appendChild(el("button",{class:"btn btn-accent", html:ICONS.download+" Download samenvatting", onclick:()=>downloadSummary(advice)}));
+    actions.appendChild(el("button",{class:"btn btn-ghost", html:ICONS.print+" Afdrukken", onclick:()=>window.print()}));
+    actions.appendChild(el("button",{class:"btn btn-ghost", onclick:()=>goTo("overview")},["Antwoorden wijzigen"]));
+    metaCard.appendChild(actions);
+    wrap.appendChild(metaCard);
+
+    return wrap;
+  }
+
+  async function downloadSummary(advice){
+    const lines = [];
+    lines.push("KLANTBEELDSCAN — Samenvatting");
+    lines.push("=================================");
+    lines.push("Organisatie: "+(state.org.naam||"—"));
+    lines.push("Rol invuller: "+(state.org.rol||"—"));
+    lines.push("Invulwijze: "+(state.org.invulwijze||"—"));
+    lines.push("Datum: "+new Date().toLocaleDateString("nl-NL"));
+    lines.push("");
+    lines.push("Aanbevolen startpunt: "+START_ADVICE_TEXT[advice.code].label);
+    lines.push(START_ADVICE_TEXT[advice.code].body);
+    lines.push("");
+    lines.push("Totaalscore: "+fmt1(advice.total)+" / 100");
+    lines.push("");
+    lines.push("Onderwerpscores:");
+    TOPICS.forEach(t=>{ lines.push("  "+t.id+". "+t.title+": "+fmt1(topicPercent(t.id,null))); });
+    if(advice.reasons.length){
+      lines.push("");
+      lines.push("Voorwaarden die het startadvies bepaalden:");
+      advice.reasons.forEach(r=>lines.push("  - "+r));
+    }
+    lines.push("");
+    lines.push("Antwoorden per vraag:");
+    QUESTIONS.forEach(q=>{
+      const a = state.answers[q.id];
+      const val = a.status==="beantwoord" ? a.points+" punt(en)" : (a.status==="weet_niet" ? "weet ik niet" : "onbeantwoord");
+      lines.push("  "+q.id+" ["+val+"] "+q.text);
+      if(a.toelichting) lines.push("      Toelichting: "+a.toelichting);
+    });
+    const blob = new Blob([lines.join("\n")], {type:"text/plain;charset=utf-8"});
+    const filename = "klantbeeldscan-"+(state.org.naam||"organisatie").replace(/[^a-z0-9]+/gi,"-").toLowerCase()+".txt";
+
+    if(!(window.claude && window.claude.use)){
+      toast("Downloaden is hier niet beschikbaar — gebruik Afdrukken.");
+      return;
+    }
+    try{
+      const downloads = await window.claude.use("downloads");
+      if(!downloads){
+        toast("Downloaden is hier niet beschikbaar — gebruik Afdrukken.");
+        return;
+      }
+      const res = await downloads.save({ filename, data: blob });
+      toast(res.status==="saved" ? "Samenvatting gedownload" : "Samenvatting verzonden");
+    }catch(err){
+      if(err && err.code==="declined"){ /* viewer chose not to save, no message needed */ }
+      else { toast("Downloaden is niet gelukt. Probeer Afdrukken."); }
+    }
+  }
+
+  /* =========================================================
+     SETTINGS DRAWER
+  ========================================================= */
+  function openSettings(){ state.settingsOpen = true; render(); }
+  function closeSettings(){ state.settingsOpen = false; render(); }
+
+  function settingsField(labelText, key, hint){
+    const row = el("div",{class:"settings-row"});
+    row.appendChild(el("label",{},[labelText]));
+    const input = el("input",{type:"number", value:CONFIG[key]});
+    input.addEventListener("change", e=>{
+      const v = parseFloat(e.target.value);
+      if(!isNaN(v)){ CONFIG[key]=v; saveConfig(CONFIG); render(); toast("Instelling bijgewerkt"); }
+    });
+    row.appendChild(input);
+    const wrap = el("div",{},[row]);
+    if(hint) wrap.appendChild(el("div",{class:"hint"},[hint]));
+    return wrap;
+  }
+
+  function renderSettingsDrawer(){
+    const backdrop = el("div",{class:"backdrop no-print", onclick:(e)=>{ if(e.target===backdrop) closeSettings(); }});
+    const drawer = el("div",{class:"drawer"});
+    drawer.appendChild(el("button",{class:"drawer-close", html:"✕", onclick:closeSettings}));
+    drawer.appendChild(el("h3",{},["Instellingen: grenswaarden"]));
+    drawer.appendChild(el("p",{class:"lede"},["Dit zijn voorlopige ontwerpgrenzen. Pas ze aan zonder de vragen opnieuw te bouwen — bijvoorbeeld na ervaring met praktijkcases. Wijzigingen worden lokaal op dit apparaat onthouden en gelden direct voor het huidige resultaat."]));
+
+    const g1 = el("div",{class:"settings-group"});
+    g1.appendChild(el("h4",{},["Eerste startadvies"]));
+    g1.appendChild(settingsField("Ondergrens 'Klantbediening verbeteren'", "startT1", "Totaalscore lager dan deze grens → Klantbeeld ontwikkelen."));
+    g1.appendChild(settingsField("Ondergrens 'Klantbediening differentiëren'", "startT2", "Totaalscore vanaf deze grens → mogelijk differentiëren."));
+    drawer.appendChild(g1);
+
+    const g2 = el("div",{class:"settings-group"});
+    g2.appendChild(el("h4",{},["Voldoende gedeeld klantbeeld"]));
+    g2.appendChild(settingsField("Minimum op Klantinzicht (A), van 12", "gedeeldA_min"));
+    g2.appendChild(settingsField("Minimum op vraag A1 (delen van klantkennis)", "gedeeldA1_min"));
+    drawer.appendChild(g2);
+
+    const g3 = el("div",{class:"settings-group"});
+    g3.appendChild(el("h4",{},["Voorwaarden voor differentiëren"]));
+    g3.appendChild(settingsField("Minimum Klantinzicht (A), van 12", "diffA_min"));
+    g3.appendChild(settingsField("Minimum Klantonderzoek (B), van 6", "diffB_min"));
+    g3.appendChild(settingsField("Minimum Klantstappen/processen (D), van 6", "diffD_min"));
+    g3.appendChild(settingsField("Minimum Gezamenlijke keuzes en doelen (E), van 8", "diffE_min"));
+    g3.appendChild(settingsField("Minimum Verantwoordelijkheid en verbeteren (F), van 10", "diffF_min"));
+    g3.appendChild(el("p",{class:"hint", style:"margin-top:10px;"},["Daarnaast moeten A4, F2, E4 en F5 elk minimaal 1 punt hebben — dit is vast onderdeel van de logica."]));
+    drawer.appendChild(g3);
+
+    const g4 = el("div",{class:"settings-group"});
+    g4.appendChild(el("button",{class:"btn btn-ghost", onclick:()=>{ CONFIG = Object.assign({}, DEFAULT_CONFIG); saveConfig(CONFIG); render(); toast("Standaardwaarden hersteld"); }},["Terugzetten naar standaardwaarden"]));
+    drawer.appendChild(g4);
+
+    backdrop.appendChild(drawer);
+    return backdrop;
+  }
+
+  /* =========================================================
+     MAIN RENDER
+  ========================================================= */
+  let navUpdater = null;
+  function updateNav(){ if(navUpdater) navUpdater(); }
+
+  function render(){
+    app.innerHTML = "";
+    app.appendChild(renderTopbar());
+
+    const name = screenName();
+    let content, navOpts;
+
+    if(name==="intro"){
+      content = screenIntro();
+      app.appendChild(content);
+      document.title = "Klantbeeldscan";
+    } else if(name==="orgdata"){
+      content = screenOrgData();
+      app.appendChild(content);
+      const nav = renderNav({
+        onBack:()=>go(-1),
+        onNext:()=>{ if(orgComplete()) go(1); },
+        nextDisabled: !orgComplete(),
+        progress:"Stap 2 van "+SCREENS.length
+      });
+      navUpdater = ()=>{ const btn = nav.querySelector(".btn-primary"); btn.disabled = !orgComplete(); };
+      app.querySelector(".center-col").after(nav);
+    } else if(name.startsWith("block-")){
+      const topicId = name.split("-")[1];
+      content = screenBlock(topicId);
+      app.appendChild(content);
+      const idx = SCREENS.indexOf(name);
+      const nav = renderNav({
+        onBack:()=>go(-1),
+        onNext:()=>go(1),
+        progress:"Onderwerp "+topicId+" · "+SCREENS.indexOf(name)+" / "+(SCREENS.length-1)
+      });
+      app.querySelector(".center-col").after(nav);
+    } else if(name==="overview"){
+      content = screenOverview();
+      app.appendChild(content);
+      const nav = renderNav({
+        onBack:()=>go(-1),
+        onNext:()=>go(1),
+        nextLabel: isComplete() ? "Bekijk resultaat" : "Toch naar resultaat",
+        progress: isComplete() ? "Alle vragen beantwoord" : (TOTAL_QUESTIONS-missingCount())+" / "+TOTAL_QUESTIONS+" beantwoord"
+      });
+      app.querySelector(".center-col").after(nav);
+    } else if(name==="results"){
+      content = screenResults();
+      app.appendChild(content);
+    }
+
+    if(state.settingsOpen){ app.appendChild(renderSettingsDrawer()); }
+  }
+
+  render();
+})();
+</script>
